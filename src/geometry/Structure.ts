@@ -2,6 +2,8 @@ import {vec3, vec4} from 'gl-matrix';
 import Drawable from '../rendering/gl/Drawable';
 import {gl} from '../globals';
 
+const PI = 3.14159;
+
 class Structure extends Drawable {
     indices: Uint32Array;
     positions: Float32Array;
@@ -312,6 +314,121 @@ class Structure extends Drawable {
         
             startIdx + 14, startIdx + 15, startIdx + 16,
             startIdx + 14, startIdx + 16, startIdx + 17];
+
+        return roofIdx;
+    }
+
+    static createRRoofPos(): number[] {
+        let roofPos: number[] = [];
+        for(let i = 0; i < 12; i++) { // bot cap
+            let p = vec3.fromValues(0,0,0);
+            vec3.rotateY(p, p, vec3.fromValues(0.5, 0, 0.5), i * PI / 6);
+            roofPos.push(p[0]);
+            roofPos.push(p[1]);
+            roofPos.push(p[2]);
+            roofPos.push(1);
+
+            p = vec3.fromValues(0,1,0);
+            vec3.rotateY(p, p, vec3.fromValues(0.5, 0, 0.5), i * PI / 6);
+            roofPos.push(p[0]);
+            roofPos.push(p[1]);
+            roofPos.push(p[2]);
+            roofPos.push(1);
+        }
+
+        roofPos.push(0.5);
+        roofPos.push(0);
+        roofPos.push(0.5);
+        roofPos.push(1);
+        for(let i = 0; i < 12; i++) { // bot cap
+            let p = vec3.fromValues(0,0,0);
+            vec3.rotateY(p, p, vec3.fromValues(0.5, 0, 0.5), i * PI / 6);
+            roofPos.push(p[0]);
+            roofPos.push(p[1]);
+            roofPos.push(p[2]);
+            roofPos.push(1);
+        }
+
+        roofPos.push(0.5);
+        roofPos.push(1);
+        roofPos.push(0.5);
+        roofPos.push(1);
+        for(let i = 0; i < 12; i++) { // bot cap
+            let p = vec3.fromValues(0,1,0);
+            vec3.rotateY(p, p, vec3.fromValues(0.5, 0, 0.5), i * PI / 6);
+            roofPos.push(p[0]);
+            roofPos.push(p[1]);
+            roofPos.push(p[2]);
+            roofPos.push(1);
+        }
+        return roofPos;
+    }
+
+    static createRRoofNor(): number[] {
+        let roofNor: number[] = [];
+        for(let i = 0; i < 12; i++) { // bot cap
+            let p = vec3.normalize(vec3.create(), vec3.fromValues(-1,0,-1));
+            vec3.rotateY(p, p, vec3.fromValues(0, 0, 0), i * PI / 6);
+            roofNor.push(p[0]);
+            roofNor.push(p[1]);
+            roofNor.push(p[2]);
+            roofNor.push(1);
+
+            roofNor.push(p[0]);
+            roofNor.push(p[1]);
+            roofNor.push(p[2]);
+            roofNor.push(1);
+        }
+        for(let i = 0; i < 13; i++) {
+            roofNor.push(0);
+            roofNor.push(-1);
+            roofNor.push(0);
+            roofNor.push(1);
+        }
+        for(let i = 0; i < 13; i++) {
+            roofNor.push(0);
+            roofNor.push(1);
+            roofNor.push(0);
+            roofNor.push(1);
+        }
+        return roofNor;
+    }
+
+    static createRRoofIdx(startIdx: number): number[] {
+        let roofIdx: number[] = [];
+        
+        for(let i = 0; i < 22; i = i + 2) {
+            roofIdx.push(startIdx + i);
+            roofIdx.push(startIdx + i + 1);
+            roofIdx.push(startIdx + i + 3);
+            roofIdx.push(startIdx + i);
+            roofIdx.push(startIdx + i + 2);
+            roofIdx.push(startIdx + i + 3);
+        }
+        roofIdx.push(startIdx + 22);
+        roofIdx.push(startIdx + 23);
+        roofIdx.push(startIdx + 1);
+        roofIdx.push(startIdx + 22);
+        roofIdx.push(startIdx + 0);
+        roofIdx.push(startIdx + 1);
+
+        for(let i = 0; i < 11; i++) {
+            roofIdx.push(startIdx + 24);
+            roofIdx.push(startIdx + 24 + i + 1);
+            roofIdx.push(startIdx + 24 + i + 2);
+        }
+        roofIdx.push(startIdx + 24);
+        roofIdx.push(startIdx + 36);
+        roofIdx.push(startIdx + 25);
+
+        for(let i = 0; i < 11; i++) {
+            roofIdx.push(startIdx + 37);
+            roofIdx.push(startIdx + 37 + i + 1);
+            roofIdx.push(startIdx + 37 + i + 2);
+        }
+        roofIdx.push(startIdx + 37);
+        roofIdx.push(startIdx + 49);
+        roofIdx.push(startIdx + 38);
 
         return roofIdx;
     }

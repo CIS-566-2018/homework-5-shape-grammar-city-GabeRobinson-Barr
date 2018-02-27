@@ -45,15 +45,20 @@ class Building {
         }
         else if (this.type == BuildingType.BIGHOUSE) {
             this.generateBigHouse();
+            this.generateBigHouseVbos();
         }
         else if (this.type == BuildingType.HOTEL) {
             this.generateHotel();
+            this.generateHotelVbos();
         }
         else if (this.type == BuildingType.OFFICE) {
             this.generateOffice();
+            this.generateOfficeVbos();
         }
         else if (this.type == BuildingType.SKYSCRAPER) {
             this.generateSkyscraper();
+            console.log(this.roof);
+            this.generateSkyscraperVbos();
         }
     }
 
@@ -153,10 +158,10 @@ class Building {
                 let rand = Math.random(); 
                 if (i == 0 || i == (this.sectionsW - 1)) { // the ends of a mansion can have extentions or towers
                     if (rand < 0.1) {
-                        this.frontwall.push('B');
+                        this.frontwall.push('T');
                     }
                     else if (rand < 0.3) {
-                        this.frontwall.push('T');
+                        this.frontwall.push('B');
                     }
                     else {
                         rand = Math.random();
@@ -482,7 +487,7 @@ class Building {
         
         let roofrand = Math.random();
         // The first 3 types of office buildings are very standardized
-        if (roofrand < 0.5) { // flat top skyscraper
+        if (roofrand < 1.0) { // flat top skyscraper
             this.roof.push('F');
         }
         else if (roofrand < 0.6) { // Pointed top skyscraper
@@ -833,7 +838,6 @@ class Building {
             for(let n = 0; n < idx.length; n++) {
                 this.indices.push(idx[n]);
             }
-
     }
 
     generateBigHouseVbos() {
@@ -850,6 +854,75 @@ class Building {
 
     generateSkyscraperVbos() {
 
+        let roofnum = 0;
+        for (let i = 0; i < this.roof.length; i++) {
+            if (this.roof[i] == 'T') {
+                roofnum++;
+            }
+        }
+
+        if (this.roof[0] == 'F') {
+            let pos = Structure.createCubePos();
+            let nor = Structure.createCubeNor();
+            let idx = Structure.createCubeIdx(0);
+
+            let temppos: number[] = [];
+
+            for (let i = 0; i < pos.length; i = i + 4) {
+                this.positions.push(pos[i] * this.dimensions[0]);
+                this.positions.push(pos[i + 1] * this.dimensions[1]);
+                this.positions.push(pos[i + 2] * this.dimensions[2]);
+                this.positions.push(pos[i + 3]);
+                
+                this.normals.push(nor[i]);
+                this.normals.push(nor[i + 1]);
+                this.normals.push(nor[i + 2]);
+                this.normals.push(nor[i + 3]);
+            }
+
+            for(let i = 0; i < idx.length; i++) {
+                this.indices.push(idx[i]);
+            }
+
+            this.pushColor(0.96, 0.96, 0.89, pos.length / 4);
+
+
+            let offset = vec3.fromValues(0, this.dimensions[1], 0);
+            for (let i = 0; i < roofnum; i++) {
+                temppos = [];
+                offset[0] = (this.dimensions[0] - (this.dimensions[0] / ((i + 2) / 2))) / 2;
+                offset[2] = (this.dimensions[2] - (this.dimensions[2] / ((i + 2) / 2))) / 2;
+                let scale = vec3.fromValues(this.dimensions[0] / ((i + 2) / 2), 1.0 - (i / 10), this.dimensions[2] / ((i + 2) / 2));
+                idx = Structure.createCubeIdx(this.positions.length / 4);
+
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    temppos[n] = pos[n] * scale[0] + offset[0];
+                    temppos[n + 1] = pos[n + 1] * scale[1] + offset[1];
+                    temppos[n + 2] = pos[n + 2] * scale[2] + offset[2];
+                    temppos[n + 3] = pos[n + 3];
+
+                    this.positions.push(temppos[n]);
+                    this.positions.push(temppos[n + 1]);
+                    this.positions.push(temppos[n + 2]);
+                    this.positions.push(temppos[n + 3]);
+
+                    this.normals.push(nor[n]);
+                    this.normals.push(nor[n + 1]);
+                    this.normals.push(nor[n + 2]);
+                    this.normals.push(nor[n + 3]);
+                }
+                this.pushColor(0.76, 0.76, 0.69, pos.length / 4);
+                
+                for (let n = 0; n < idx.length; n++) {
+                    this.indices.push(idx[n]);
+                }
+                
+                offset[1] += scale[1];
+            }
+
+        }
+        console.log(roofnum);
+        
     }
 
 };
