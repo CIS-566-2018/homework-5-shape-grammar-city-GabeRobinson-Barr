@@ -2,6 +2,10 @@
 # Project 5: Shape Grammar
 
 Gabriel Robinson-Barr
+
+Here is my github pages link:
+https://gaberobinson-barr.github.io/homework-5-shape-grammar-city-GabeRobinson-Barr/
+
 ## Things to know about my city grammars.
 Each building is created in Building.ts and the design is determined by the type of building. The actual building grammar is near impossible to read, and I'm sorry for that, but by the time I realized how unreadable and messy it was I was way too far in to go back and fix it. Ill list an abbreviated version of the rules here.
 
