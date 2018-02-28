@@ -58,7 +58,7 @@ function loadScene() {
 
   // tree = new Tree();
   // tree.createTree(parser.positions, parser.normals, parser.colors);
-  buil = new Building(BuildingType.SKYSCRAPER, vec3.fromValues(5,10,5));
+  buil = new Building(BuildingType.OFFICE, vec3.fromValues(5,10,5));
 
   str = new Structure();
   str.createCity(buil.positions, buil.normals, buil.colors, buil.indices);

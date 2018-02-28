@@ -57,7 +57,6 @@ class Building {
         }
         else if (this.type == BuildingType.SKYSCRAPER) {
             this.generateSkyscraper();
-            console.log(this.roof);
             this.generateSkyscraperVbos();
         }
     }
@@ -298,39 +297,21 @@ class Building {
         this.sectionsW = Math.floor(width);
         this.sectionsD = Math.floor(depth);
 
-        let roofrand = Math.random();
-        // The first 3 types of office buildings are very standardized
-        if (roofrand < 0.5) { // One type of office building
-            this.roof.push('M');
-        }
-        else if (roofrand < 0.6) { // Another type of office building
-            this.roof.push('L')
-        }
-        else if (roofrand < 0.7) { // A third type
-            this.roof.push('l');
-        }
-        else { // If it is none of these types use the 4th type that has less identical floors
-            this.roof.push('S');
+            
             for (let s = 0; s < this.stories; s++) { // For each story we have to fill each wall sections
                 this.frontwall.push('['); // Characters starts a story
                 this.backwall.push('[');
                 this.leftwall.push('[');
                 this.rightwall.push('[');
 
-                let inset = Math.random() < 0.5;
                 let started = false;
                 let ended = false;
                 for (let i = 0; i < this.sectionsW; i++) { // Assume each section of an office building has a window
                     let rand = Math.random();
                     if (!started) {
-                        if (i < (this.sectionsW / 2) && rand < 0.05) { // Start an extended or inset section
+                        if (i < (this.sectionsW / 2) && rand < 0.1) { // Start an extended or inset section
                             started = true;
-                            if (inset) {
-                                this.frontwall.push('I');
-                            }
-                            else {
-                                this.frontwall.push('E');
-                            }
+                            this.frontwall.push('E');
                         }
                         else {
                             this.frontwall.push('w');
@@ -342,12 +323,7 @@ class Building {
                             this.frontwall.push('w');
                         }
                         else {
-                            if (inset) {
-                                this.frontwall.push('I');
-                            }
-                            else {
-                                this.frontwall.push('E');
-                            }
+                            this.frontwall.push('E');
                         }
                     }
                     else { // If we already started and ended a section on this wall
@@ -360,14 +336,9 @@ class Building {
                 for (let i = 0; i < this.sectionsW; i++) { // Repeat for the back wall
                     let rand = Math.random();
                     if (!started) {
-                        if (i < (this.sectionsW / 2) && rand < 0.05) { // Start an extended or inset section
+                        if (i < (this.sectionsW / 2) && rand < 0.1) { // Start an extended or inset section
                             started = true;
-                            if (inset) {
-                                this.backwall.push('I');
-                            }
-                            else {
-                                this.backwall.push('E');
-                            }
+                            this.backwall.push('E');
                         }
                         else {
                             this.backwall.push('w');
@@ -379,12 +350,7 @@ class Building {
                             this.backwall.push('w');
                         }
                         else {
-                            if (inset) {
-                                this.backwall.push('I');
-                            }
-                            else {
-                                this.backwall.push('E');
-                            }
+                            this.backwall.push('E');
                         }
                     }
                     else { // If we already started and ended a section on this wall
@@ -396,14 +362,9 @@ class Building {
                 for (let i = 0; i < this.sectionsD; i++) { // Do the same for the left wall
                     let rand = Math.random();
                     if (!started) {
-                        if (i < (this.sectionsD / 2) && rand < 0.05) { // Start an extended or inset section
+                        if (i < (this.sectionsD / 2) && rand < 0.1) { // Start an extended or inset section
                             started = true;
-                            if (inset) {
-                                this.leftwall.push('I');
-                            }
-                            else {
-                                this.leftwall.push('E');
-                            }
+                            this.leftwall.push('E');
                         }
                         else {
                             this.leftwall.push('w');
@@ -415,12 +376,7 @@ class Building {
                             this.leftwall.push('w');
                         }
                         else {
-                            if (inset) {
-                                this.leftwall.push('I');
-                            }
-                            else {
-                                this.leftwall.push('E');
-                            }
+                            this.leftwall.push('E');
                         }
                     }
                     else { // If we already started and ended a section on this wall
@@ -432,14 +388,9 @@ class Building {
                 for (let i = 0; i < this.sectionsD; i++) { // Do the same for the right wall
                     let rand = Math.random();
                     if (!started) {
-                        if (i < (this.sectionsD / 2) && rand < 0.05) { // Start an extended or inset section
+                        if (i < (this.sectionsD / 2) && rand < 0.1) { // Start an extended or inset section
                             started = true;
-                            if (inset) {
-                                this.rightwall.push('I');
-                            }
-                            else {
-                                this.rightwall.push('E');
-                            }
+                            this.rightwall.push('E');
                         }
                         else {
                             this.rightwall.push('w');
@@ -451,12 +402,7 @@ class Building {
                             this.rightwall.push('w');
                         }
                         else {
-                            if (inset) {
-                                this.rightwall.push('I');
-                            }
-                            else {
-                                this.rightwall.push('E');
-                            }
+                            this.rightwall.push('E');
                         }
                     }
                     else { // If we already started and ended a section on this wall
@@ -469,7 +415,6 @@ class Building {
                 this.leftwall.push(']');
                 this.rightwall.push(']');
             }
-        } // End grammar for the 4th type of office building
 
         this.garage = false; // no garage in an office
 
@@ -849,6 +794,526 @@ class Building {
     }
 
     generateOfficeVbos() {
+        let pos = Structure.createCubePos();
+        let nor = Structure.createCubeNor();
+        let idx = Structure.createCubeIdx(this.positions.length / 4);
+
+        for (let i = 0; i < pos.length; i = i + 4) {
+            this.positions.push(pos[i] * this.dimensions[0]);
+            this.positions.push(pos[i + 1] * this.dimensions[1]);
+            this.positions.push(pos[i + 2] * this.dimensions[2]);
+            this.positions.push(pos[i + 3]);
+
+            // This will properly transform the normal based on the scaling of the building
+            let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / this.dimensions[1], nor[i + 2] / this.dimensions[2]));
+
+            this.normals.push(norvec[0]);
+            this.normals.push(norvec[1]);
+            this.normals.push(norvec[2]);
+            this.normals.push(nor[i + 3]);                    
+        }
+
+
+        for(let i = 0; i < idx.length; i++) {
+            this.indices.push(idx[i]);
+        }
+
+        this.pushColor(0.76, 0.76, 0.69, pos.length / 4);
+        
+        let startpos = -1;
+        let length = 0;
+        let story = 0;
+        let section = 0;
+        let extended = false;
+
+        let offsetW = this.dimensions[0] / this.sectionsW;
+        let offsetD = this.dimensions[2] / this.sectionsD;
+        let offsetH = this.dimensions[1] / this.stories;
+
+        for (let i = 0; i < this.frontwall.length; i++) {
+            let s = this.frontwall[i];
+            if (s == '[') {
+                startpos = -1;
+                length = 0;
+                extended = false;
+            }
+            else if (s == ']') {
+                if (startpos != -1 && story >= 1) { // Can only extend if above ground floor
+                    pos = Structure.createCubePos(); // At the end of a story push any extended parts to the vbos
+                    nor = Structure.createCubeNor();
+                    let idx = Structure.createCubeIdx(this.positions.length / 4);
+
+                    for (let n = 0; n < pos.length; n = n + 4) {
+                        this.positions.push(pos[n] * offsetW * length + offsetW * startpos);
+                        this.positions.push(pos[n + 1] * offsetH + offsetH * story);
+                        this.positions.push(pos[n + 2] * 0.5 - 0.51);
+                        this.positions.push(pos[n + 3]);
+
+                        // This will properly transform the normal based on the scaling of the building
+                        let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2] / 0.5));
+
+                        this.normals.push(norvec[0]);
+                        this.normals.push(norvec[1]);
+                        this.normals.push(norvec[2]);
+                        this.normals.push(nor[n + 3]);  
+                    }
+
+                    for(let n = 0; n < idx.length; n++) {
+                        this.indices.push(idx[n]);
+                    }
+                    this.pushColor(0.56, 0.56, 0.59, pos.length / 4);
+                }
+
+                story++;
+                section = 0;
+            }
+            else if (s == 'E') {
+                if (startpos == -1) {
+                    startpos = section;
+                    extended = true;
+                }
+                length++;
+                section++;
+            }
+            else if (s == 'w') {
+                if (startpos != -1) {
+                    extended = false;
+                }
+
+                section++;
+            }
+            else if (s == 'D') { // Creates doors
+                pos = Structure.createBWindowPos();
+                nor = Structure.createBWindowNor();
+                let idx = Structure.createBWindowIdx(this.positions.length / 4);
+                
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    this.positions.push(pos[n] * offsetW * 0.9 + offsetW * section + 0.5);
+                    this.positions.push(pos[n + 1] * offsetH * 0.9);
+                    this.positions.push(-pos[n + 2] - 0.01);
+                    this.positions.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / (offsetW * 0.9), nor[n + 1] / (offsetH * 0.9) , nor[n + 2]));
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(nor[n + 3]);  
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    this.indices.push(idx[n]);
+                }
+                this.pushColor(0.6, 0.6, 0.8, 4);
+                this.pushColor(0.0, 0.0, 0.0, 4);
+
+                section++;
+            }
+
+            if (story >= 1 && s != '[' && s != ']') {
+                pos = Structure.createSquarePos();
+                nor = Structure.createSquareNor();
+                let idx = Structure.createSquareIdx(this.positions.length / 4);
+                let zoff = 0.01;
+                if (extended) {
+                    zoff += 0.51;
+                }
+                
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    this.positions.push(pos[n] * offsetW * 0.8 + offsetW * (section - 1) + 0.1);
+                    this.positions.push(pos[n + 1] * offsetH * 0.8 + offsetH * story + 0.1);
+                    this.positions.push(pos[n + 2] - zoff);
+                    this.positions.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2]));
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(nor[n + 3]);  
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    this.indices.push(idx[n]);
+                }
+                this.pushColor(0.1, 0.1, 0.1, pos.length / 4);
+            }
+        } // end of frontwall
+
+        // create the vbos for the backwall
+        startpos = -1;
+        length = 0;
+        story = 0;
+        section = 0;
+        extended = false;
+
+        let temppos: number[] = []; // push to these before transforming for appropriate wall
+        let tempnor: number[] = [];
+        let tempidx: number[] = [];
+
+        for (let i = 0; i < this.backwall.length; i++) {
+            let s = this.backwall[i];
+            if (s == '[') {
+                startpos = -1;
+                length = 0;
+                extended = false;
+            }
+            else if (s == ']') {
+                if (startpos != -1 && story >= 1) {
+                    pos = Structure.createCubePos(); // At the end of a story push any extended parts to the vbos
+                    nor = Structure.createCubeNor();
+                    let idx = Structure.createCubeIdx(temppos.length / 4);
+
+                    for (let n = 0; n < pos.length; n = n + 4) {
+                        temppos.push(pos[n] * offsetW * length + offsetW * startpos);
+                        temppos.push(pos[n + 1] * offsetH + offsetH * story);
+                        temppos.push(pos[n + 2] * 0.5 - 0.51);
+                        temppos.push(pos[n + 3]);
+
+                        // This will properly transform the normal based on the scaling of the building
+                        let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2] / 0.5));
+
+                        tempnor.push(norvec[0]);
+                        tempnor.push(norvec[1]);
+                        tempnor.push(norvec[2]);
+                        tempnor.push(nor[n + 3]);  
+                    }
+
+                    for(let n = 0; n < idx.length; n++) {
+                        tempidx.push(idx[n]);
+                    }
+                    this.pushColor(0.56, 0.56, 0.59, pos.length / 4);
+                }
+
+                story++;
+                section = 0;
+            }
+            else if (s == 'E') {
+                if (startpos == -1) {
+                    startpos = section;
+                    extended = true;
+                }
+                length++;
+                section++;
+            }
+            else if (s == 'w') {
+                if (startpos != -1) {
+                    extended = false;
+                }
+
+                section++;
+            }
+
+            if (story >= 1 && s != '[' && s != ']') {
+                pos = Structure.createSquarePos();
+                nor = Structure.createSquareNor();
+                let idx = Structure.createSquareIdx(temppos.length / 4);
+                let zoff = 0.01;
+                if (extended) {
+                    zoff += 0.51;
+                }
+                
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    temppos.push(pos[n] * offsetW * 0.8 + offsetW * (section - 1) + 0.1);
+                    temppos.push(pos[n + 1] * offsetH * 0.8 + offsetH * story + 0.1);
+                    temppos.push(pos[n + 2] - zoff);
+                    temppos.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2]));
+
+                    tempnor.push(norvec[0]);
+                    tempnor.push(norvec[1]);
+                    tempnor.push(norvec[2]);
+                    tempnor.push(nor[n + 3]);  
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    tempidx.push(idx[n]);
+                }
+                this.pushColor(0.1, 0.1, 0.1, pos.length / 4);
+            }
+        } // end of backwall
+
+        for (let i = 0; i < tempidx.length; i++) {
+            this.indices.push(tempidx[i] + (this.positions.length / 4)); // do this first because we need to offset by the existing verts
+        }
+
+        for(let i = 0; i < temppos.length; i = i + 4) {
+            let posvec = vec3.fromValues(temppos[i], temppos[i + 1], temppos[i + 2]);
+            vec3.rotateY(posvec, posvec, vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[2] / 2), PI);
+
+            this.positions.push(posvec[0]);
+            this.positions.push(posvec[1]);
+            this.positions.push(posvec[2]);
+            this.positions.push(temppos[i + 3]);
+
+            let norvec = vec3.fromValues(tempnor[i], tempnor[i + 1], tempnor[i + 2]);
+            vec3.rotateY(norvec, norvec, vec3.fromValues(0, 0, 0), PI);
+
+            this.normals.push(norvec[0]);
+            this.normals.push(norvec[1]);
+            this.normals.push(norvec[2]);
+            this.normals.push(tempnor[i + 3]);
+        }
+
+        // Repeat for left wall
+        startpos = -1;
+        length = 0;
+        story = 0;
+        section = 0;
+        extended = false;
+
+        temppos = []; // push to these before transforming for appropriate wall
+        tempnor = [];
+        tempidx = [];
+
+        for (let i = 0; i < this.leftwall.length; i++) {
+            let s = this.leftwall[i];
+            if (s == '[') {
+                startpos = -1;
+                length = 0;
+                extended = false;
+            }
+            else if (s == ']') {
+                if (startpos != -1 && story >= 1) {
+                    pos = Structure.createCubePos(); // At the end of a story push any extended parts to the vbos
+                    nor = Structure.createCubeNor();
+                    let idx = Structure.createCubeIdx(temppos.length / 4);
+
+                    for (let n = 0; n < pos.length; n = n + 4) {
+                        temppos.push(pos[n] * offsetW * length + offsetW * startpos);
+                        temppos.push(pos[n + 1] * offsetH + offsetH * story);
+                        temppos.push(pos[n + 2] * 0.5 - 0.51);
+                        temppos.push(pos[n + 3]);
+
+                        // This will properly transform the normal based on the scaling of the building
+                        let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2] / 0.5));
+
+                        tempnor.push(norvec[0]);
+                        tempnor.push(norvec[1]);
+                        tempnor.push(norvec[2]);
+                        tempnor.push(nor[n + 3]);  
+                    }
+
+                    for(let n = 0; n < idx.length; n++) {
+                        tempidx.push(idx[n]);
+                    }
+                    this.pushColor(0.56, 0.56, 0.59, pos.length / 4);
+                }
+
+                story++;
+                section = 0;
+            }
+            else if (s == 'E') {
+                if (startpos == -1) {
+                    startpos = section;
+                    extended = true;
+                }
+                length++;
+                section++;
+            }
+            else if (s == 'w') {
+                if (startpos != -1) {
+                    extended = false;
+                }
+
+                section++;
+            }
+
+            if (story >= 1 && s != '[' && s != ']') {
+                pos = Structure.createSquarePos();
+                nor = Structure.createSquareNor();
+                let idx = Structure.createSquareIdx(temppos.length / 4);
+                let zoff = 0.01;
+                if (extended) {
+                    zoff += 0.51;
+                }
+                
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    temppos.push(pos[n] * offsetW * 0.8 + offsetW * (section - 1) + 0.1);
+                    temppos.push(pos[n + 1] * offsetH * 0.8 + offsetH * story + 0.1);
+                    temppos.push(pos[n + 2] - zoff);
+                    temppos.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2]));
+
+                    tempnor.push(norvec[0]);
+                    tempnor.push(norvec[1]);
+                    tempnor.push(norvec[2]);
+                    tempnor.push(nor[n + 3]);  
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    tempidx.push(idx[n]);
+                }
+                this.pushColor(0.1, 0.1, 0.1, pos.length / 4);
+            }
+        } // end of leftwall
+
+        for (let i = 0; i < tempidx.length; i++) {
+            this.indices.push(tempidx[i] + (this.positions.length / 4)); // do this first because we need to offset by the existing verts
+        }
+
+        for(let i = 0; i < temppos.length; i = i + 4) {
+            let posvec = vec3.fromValues(temppos[i], temppos[i + 1], temppos[i + 2]);
+            vec3.rotateY(posvec, posvec, vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[2] / 2), PI / 2);
+
+            this.positions.push(posvec[0]);
+            this.positions.push(posvec[1]);
+            this.positions.push(posvec[2]);
+            this.positions.push(temppos[i + 3]);
+
+            let norvec = vec3.fromValues(tempnor[i], tempnor[i + 1], tempnor[i + 2]);
+            vec3.rotateY(norvec, norvec, vec3.fromValues(0, 0, 0), PI / 2);
+
+            this.normals.push(norvec[0]);
+            this.normals.push(norvec[1]);
+            this.normals.push(norvec[2]);
+            this.normals.push(tempnor[i + 3]);
+        }
+
+        // Repeat for right wall
+        startpos = -1;
+        length = 0;
+        story = 0;
+        section = 0;
+        extended = false;
+
+        temppos = []; // push to these before transforming for appropriate wall
+        tempnor = [];
+        tempidx = [];
+
+        for (let i = 0; i < this.rightwall.length; i++) {
+            let s = this.rightwall[i];
+            if (s == '[') {
+                startpos = -1;
+                length = 0;
+                extended = false;
+            }
+            else if (s == ']') {
+                if (startpos != -1 && story >= 1) {
+                    pos = Structure.createCubePos(); // At the end of a story push any extended parts to the vbos
+                    nor = Structure.createCubeNor();
+                    let idx = Structure.createCubeIdx(temppos.length / 4);
+
+                    for (let n = 0; n < pos.length; n = n + 4) {
+                        temppos.push(pos[n] * offsetW * length + offsetW * startpos);
+                        temppos.push(pos[n + 1] * offsetH + offsetH * story);
+                        temppos.push(pos[n + 2] * 0.5 - 0.51);
+                        temppos.push(pos[n + 3]);
+
+                        // This will properly transform the normal based on the scaling of the building
+                        let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2] / 0.5));
+
+                        tempnor.push(norvec[0]);
+                        tempnor.push(norvec[1]);
+                        tempnor.push(norvec[2]);
+                        tempnor.push(nor[n + 3]);  
+                    }
+
+                    for(let n = 0; n < idx.length; n++) {
+                        tempidx.push(idx[n]);
+                    }
+                    this.pushColor(0.56, 0.56, 0.59, pos.length / 4);
+                }
+
+                story++;
+                section = 0;
+            }
+            else if (s == 'E') {
+                if (startpos == -1) {
+                    startpos = section;
+                    extended = true;
+                }
+                length++;
+                section++;
+            }
+            else if (s == 'w') {
+                if (startpos != -1) {
+                    extended = false;
+                }
+
+                section++;
+            }
+
+            if (story >= 1 && s != '[' && s != ']') {
+                pos = Structure.createSquarePos();
+                nor = Structure.createSquareNor();
+                let idx = Structure.createSquareIdx(temppos.length / 4);
+                let zoff = 0.01;
+                if (extended) {
+                    zoff += 0.51;
+                }
+                
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    temppos.push(pos[n] * offsetW * 0.8 + offsetW * (section - 1) + 0.1);
+                    temppos.push(pos[n + 1] * offsetH * 0.8 + offsetH * story + 0.1);
+                    temppos.push(pos[n + 2] - zoff);
+                    temppos.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2]));
+
+                    tempnor.push(norvec[0]);
+                    tempnor.push(norvec[1]);
+                    tempnor.push(norvec[2]);
+                    tempnor.push(nor[n + 3]);  
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    tempidx.push(idx[n]);
+                }
+                this.pushColor(0.1, 0.1, 0.1, pos.length / 4);
+            }
+        } // end of rightwall
+
+        for (let i = 0; i < tempidx.length; i++) {
+            this.indices.push(tempidx[i] + (this.positions.length / 4)); // do this first because we need to offset by the existing verts
+        }
+
+        for(let i = 0; i < temppos.length; i = i + 4) {
+            let posvec = vec3.fromValues(temppos[i], temppos[i + 1], temppos[i + 2]);
+            vec3.rotateY(posvec, posvec, vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[2] / 2), -PI / 2);
+
+            this.positions.push(posvec[0]);
+            this.positions.push(posvec[1]);
+            this.positions.push(posvec[2]);
+            this.positions.push(temppos[i + 3]);
+
+            let norvec = vec3.fromValues(tempnor[i], tempnor[i + 1], tempnor[i + 2]);
+            vec3.rotateY(norvec, norvec, vec3.fromValues(0, 0, 0), -PI / 2);
+
+            this.normals.push(norvec[0]);
+            this.normals.push(norvec[1]);
+            this.normals.push(norvec[2]);
+            this.normals.push(tempnor[i + 3]);
+        }
+
+        pos = Structure.createCubePos();
+        nor = Structure.createCubeNor();
+        idx = Structure.createCubeIdx(this.positions.length / 4);
+
+        for(let i = 0; i < pos.length; i = i + 4) {
+
+            this.positions.push(pos[i] * this.dimensions[0]);
+            this.positions.push(pos[i + 1] * 0.2 + this.dimensions[1]);
+            this.positions.push(pos[i + 2] * this.dimensions[2]);
+            this.positions.push(pos[i + 3]);
+
+
+            this.normals.push(nor[i]);
+            this.normals.push(nor[i + 1]);
+            this.normals.push(nor[i + 2]);
+            this.normals.push(nor[i + 3]);
+        }
+        for(let n = 0; n < idx.length; n++) {
+            this.indices.push(idx[n]);
+        }
+        this.pushColor(0.5, 0.5, 0.5, pos.length / 4);
 
     }
 
