@@ -487,13 +487,13 @@ class Building {
         
         let roofrand = Math.random();
         // The first 3 types of office buildings are very standardized
-        if (roofrand < 1.0) { // flat top skyscraper
+        if (roofrand < 0.4) { // flat top skyscraper
             this.roof.push('F');
         }
-        else if (roofrand < 0.6) { // Pointed top skyscraper
+        else if (roofrand < 0.8) { // Pointed top skyscraper
             this.roof.push('P')
         }
-        else if (roofrand < 0.7) { // A Round Skyscraper
+        else { // A Round Skyscraper
             this.roof.push('R');
         }
         roofrand = (Math.random() * 5) + 1; // How many layered tiers the roof has
@@ -853,76 +853,214 @@ class Building {
     }
 
     generateSkyscraperVbos() {
+        if (this.roof[0] == 'R') {
+            let pos = Structure.createCylinderPos();
+            let nor = Structure.createCylinderNor();
 
-        let roofnum = 0;
-        for (let i = 0; i < this.roof.length; i++) {
-            if (this.roof[i] == 'T') {
-                roofnum++;
+            for(let s = 0; s < this.dimensions[1]; s++) {
+                let idx = Structure.createCylinderIdx(this.positions.length / 4);
+                let idx2 = Structure.createCylinderIdx((this.positions.length / 4) + (pos.length / 4));
+                let offset = vec3.fromValues(0, s, 0);
+                let windH = 0.9;
+                let gapH = 0.1;
+
+                for (let i = 0; i < pos.length; i = i + 4) {
+                    this.positions.push(pos[i] * this.dimensions[0]);
+                    this.positions.push(pos[i + 1] * windH + offset[1]);
+                    this.positions.push(pos[i + 2] * this.dimensions[2]);
+                    this.positions.push(pos[i + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / windH, nor[i + 2] / this.dimensions[2]));
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(nor[i + 3]);                    
+                }
+
+                for (let i = 0; i < pos.length; i = i + 4) {
+                    this.positions.push(pos[i] * this.dimensions[0]);
+                    this.positions.push(pos[i + 1] * gapH + (offset[1] + windH));
+                    this.positions.push(pos[i + 2] * this.dimensions[2]);
+                    this.positions.push(pos[i + 3]);
+
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / gapH, nor[i + 2] / this.dimensions[2]));
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(nor[i + 3]);  
+                }
+
+                for(let i = 0; i < idx.length; i++) {
+                    this.indices.push(idx[i]);
+                }
+
+                for(let i = 0; i < idx.length; i++) {
+                    this.indices.push(idx2[i]);
+                }
+                
+                this.pushColor(0.5, 0.5, 0.5, pos.length / 4);
+                this.pushColor(0.96, 0.96, 0.89, pos.length / 4);
             }
-        }
 
-        if (this.roof[0] == 'F') {
-            let pos = Structure.createCubePos();
-            let nor = Structure.createCubeNor();
-            let idx = Structure.createCubeIdx(0);
-
-            let temppos: number[] = [];
+            pos = Structure.createRRoofPos();
+            nor = Structure.createRRoofNor();
+            let idx = Structure.createRRoofIdx(this.positions.length / 4);
 
             for (let i = 0; i < pos.length; i = i + 4) {
                 this.positions.push(pos[i] * this.dimensions[0]);
-                this.positions.push(pos[i + 1] * this.dimensions[1]);
+                this.positions.push(pos[i + 1] * this.dimensions[1] / 3 + this.dimensions[1]);
                 this.positions.push(pos[i + 2] * this.dimensions[2]);
                 this.positions.push(pos[i + 3]);
-                
-                this.normals.push(nor[i]);
-                this.normals.push(nor[i + 1]);
-                this.normals.push(nor[i + 2]);
-                this.normals.push(nor[i + 3]);
+
+                let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / (this.dimensions[1] / 3), nor[i + 2] / this.dimensions[2]));
+
+                this.normals.push(norvec[0]);
+                this.normals.push(norvec[1]);
+                this.normals.push(norvec[2]);
+                this.normals.push(nor[i + 3]);                     
             }
 
             for(let i = 0; i < idx.length; i++) {
                 this.indices.push(idx[i]);
             }
 
-            this.pushColor(0.96, 0.96, 0.89, pos.length / 4);
-
-
-            let offset = vec3.fromValues(0, this.dimensions[1], 0);
-            for (let i = 0; i < roofnum; i++) {
-                temppos = [];
-                offset[0] = (this.dimensions[0] - (this.dimensions[0] / ((i + 2) / 2))) / 2;
-                offset[2] = (this.dimensions[2] - (this.dimensions[2] / ((i + 2) / 2))) / 2;
-                let scale = vec3.fromValues(this.dimensions[0] / ((i + 2) / 2), 1.0 - (i / 10), this.dimensions[2] / ((i + 2) / 2));
-                idx = Structure.createCubeIdx(this.positions.length / 4);
-
-                for (let n = 0; n < pos.length; n = n + 4) {
-                    temppos[n] = pos[n] * scale[0] + offset[0];
-                    temppos[n + 1] = pos[n + 1] * scale[1] + offset[1];
-                    temppos[n + 2] = pos[n + 2] * scale[2] + offset[2];
-                    temppos[n + 3] = pos[n + 3];
-
-                    this.positions.push(temppos[n]);
-                    this.positions.push(temppos[n + 1]);
-                    this.positions.push(temppos[n + 2]);
-                    this.positions.push(temppos[n + 3]);
-
-                    this.normals.push(nor[n]);
-                    this.normals.push(nor[n + 1]);
-                    this.normals.push(nor[n + 2]);
-                    this.normals.push(nor[n + 3]);
-                }
-                this.pushColor(0.76, 0.76, 0.69, pos.length / 4);
-                
-                for (let n = 0; n < idx.length; n++) {
-                    this.indices.push(idx[n]);
-                }
-                
-                offset[1] += scale[1];
-            }
+            this.pushColor(0.76, 0.76, 0.69, pos.length / 4);
 
         }
-        console.log(roofnum);
-        
+
+        else {
+            let pos = Structure.createCubePos();
+            let nor = Structure.createCubeNor();
+
+            for(let s = 0; s < this.dimensions[1]; s++) {
+                let idx = Structure.createCubeIdx(this.positions.length / 4);
+                let idx2 = Structure.createCubeIdx((this.positions.length / 4) + (pos.length / 4));
+                let offset = vec3.fromValues(0, s, 0);
+                let windH = 0.9;
+                let gapH = 0.1;
+
+                for (let i = 0; i < pos.length; i = i + 4) {
+                    this.positions.push(pos[i] * this.dimensions[0]);
+                    this.positions.push(pos[i + 1] * windH + offset[1]);
+                    this.positions.push(pos[i + 2] * this.dimensions[2]);
+                    this.positions.push(pos[i + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / windH, nor[i + 2] / this.dimensions[2]));
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(nor[i + 3]);                    
+                }
+
+                for (let i = 0; i < pos.length; i = i + 4) {
+                    this.positions.push(pos[i] * this.dimensions[0]);
+                    this.positions.push(pos[i + 1] * gapH + (offset[1] + windH));
+                    this.positions.push(pos[i + 2] * this.dimensions[2]);
+                    this.positions.push(pos[i + 3]);
+
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / gapH, nor[i + 2] / this.dimensions[2]));
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(nor[i + 3]);  
+                }
+
+                for(let i = 0; i < idx.length; i++) {
+                    this.indices.push(idx[i]);
+                }
+
+                for(let i = 0; i < idx.length; i++) {
+                    this.indices.push(idx2[i]);
+                }
+                
+                this.pushColor(0.5, 0.5, 0.5, pos.length / 4);
+                this.pushColor(0.96, 0.96, 0.89, pos.length / 4);
+            }
+
+            let roofnum = 0;
+            for (let i = 0; i < this.roof.length; i++) {
+                if (this.roof[i] == 'T') {
+                    roofnum++;
+                }
+            }
+
+            if (this.roof[0] == 'F') {
+
+                let offset = vec3.fromValues(0, this.dimensions[1], 0);
+                for (let i = 0; i < roofnum; i++) {
+                    offset[0] = (this.dimensions[0] - (this.dimensions[0] / ((i + 2) / 2))) / 2;
+                    offset[2] = (this.dimensions[2] - (this.dimensions[2] / ((i + 2) / 2))) / 2;
+
+                    let scale = vec3.fromValues(this.dimensions[0] / ((i + 2) / 2), 1.0 - (i / 10), this.dimensions[2] / ((i + 2) / 2));
+                    let idx = Structure.createCubeIdx(this.positions.length / 4);
+
+                    for (let n = 0; n < pos.length; n = n + 4) {
+                        this.positions.push(pos[n] * scale[0] + offset[0]);
+                        this.positions.push(pos[n + 1] * scale[1] + offset[1]);
+                        this.positions.push(pos[n + 2] * scale[2] + offset[2]);
+                        this.positions.push(pos[n + 3]);
+
+                        let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / scale[0], nor[i + 1] / scale[1], nor[i + 2] / scale[2]));
+
+                        this.normals.push(norvec[0]);
+                        this.normals.push(norvec[1]);
+                        this.normals.push(norvec[2]);
+                        this.normals.push(nor[i + 3]);  
+                    }
+                    this.pushColor(0.76, 0.76, 0.69, pos.length / 4);
+                    
+                    for (let n = 0; n < idx.length; n++) {
+                        this.indices.push(idx[n]);
+                    }
+                    
+                    offset[1] += scale[1];
+                }
+            }
+
+            else {
+                pos = Structure.createSRoofPos();
+                nor = Structure.createSRoofNor();
+
+                let offset = vec3.fromValues(0, this.dimensions[1], 0);
+                let scale = vec3.fromValues(this.dimensions[0], 2, this.dimensions[2]);
+                for (let i = 0; i < roofnum; i++) {
+                    offset[0] = (this.dimensions[0] - scale[0]) / 2;
+                    offset[2] = (this.dimensions[2] - scale[2]) / 2;
+
+                    let idx = Structure.createCubeIdx(this.positions.length / 4);
+
+                    for (let n = 0; n < pos.length; n = n + 4) {
+                        this.positions.push(pos[n] * scale[0] + offset[0]);
+                        this.positions.push(pos[n + 1] * scale[1] + offset[1]);
+                        this.positions.push(pos[n + 2] * scale[2] + offset[2]);
+                        this.positions.push(pos[n + 3]);
+
+                        let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / scale[0], nor[i + 1] / scale[1], nor[i + 2] / scale[2]));
+
+                        this.normals.push(norvec[0]);
+                        this.normals.push(norvec[1]);
+                        this.normals.push(norvec[2]);
+                        this.normals.push(nor[i + 3]);  
+                    }
+                    this.pushColor(0.76, 0.76, 0.69, pos.length / 4);
+                    
+                    for (let n = 0; n < idx.length; n++) {
+                        this.indices.push(idx[n]);
+                    }
+                    
+                    offset[1] += scale[1];
+                    scale[0] *= 0.5;
+                    scale[1] *= 0.8;
+                    scale[2] *= 0.5;
+                }
+            }
+        }
     }
 
 };
