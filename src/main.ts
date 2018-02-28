@@ -25,6 +25,11 @@ const controls = {
   'Weeping Willow Mode': false,
   OBJName: '',
   'Load OBJ': loadObj,
+  SingleBuilding: true,
+  width: 8,
+  depth: 5,
+  height: 3,
+  type: 'BIGHOUSE',
 };
 
 let icosphere: Icosphere;
@@ -58,10 +63,31 @@ function loadScene() {
 
   // tree = new Tree();
   // tree.createTree(parser.positions, parser.normals, parser.colors);
-  buil = new Building(BuildingType.OFFICE, vec3.fromValues(5,10,5));
 
-  str = new Structure();
-  str.createCity(buil.positions, buil.normals, buil.colors, buil.indices);
+  if (controls.SingleBuilding) {
+    let t: BuildingType;
+    if (controls.type == 'HOUSE') {
+      t = BuildingType.HOUSE;
+    }
+    else if (controls.type == 'BIGHOUSE') {
+      t = BuildingType.BIGHOUSE;
+    }
+    else if (controls.type == 'HOTEL') {
+      t = BuildingType.HOTEL;
+    }
+    else if (controls.type == 'OFFICE') {
+      t = BuildingType.OFFICE;
+    }
+    else if (controls.type == 'SKYSCRAPER') {
+      t = BuildingType.SKYSCRAPER;
+    }
+
+
+    buil = new Building(t, vec3.fromValues(controls.width,controls.height,controls.depth));
+
+    str = new Structure();
+    str.createCity(buil.positions, buil.normals, buil.colors, buil.indices);
+  }
 
 }
 
@@ -95,7 +121,11 @@ function main() {
   gui.add(controls, 'iterations', 1, 30).step(1);
   gui.add(controls, 'OBJName');
   gui.add(controls, 'Load OBJ');
-  //gui.add(controls, "Weeping Willow Mode");
+  gui.add(controls, 'SingleBuilding');
+  gui.add(controls, 'width', 1, 10).step(1);
+  gui.add(controls, 'depth', 1, 10).step(1);
+  gui.add(controls, 'height', 1, 20).step(1);
+  gui.add(controls, 'type', ['HOUSE', 'BIGHOUSE', 'HOTEL', 'OFFICE', 'SKYSCRAPER']);
   
 
   // get canvas and webgl context
@@ -111,7 +141,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 0, 20), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(0, 10, -20), vec3.fromValues(0, 5, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);

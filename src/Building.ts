@@ -45,6 +45,7 @@ class Building {
         }
         else if (this.type == BuildingType.BIGHOUSE) {
             this.generateBigHouse();
+            console.log(this.frontwall);
             this.generateBigHouseVbos();
         }
         else if (this.type == BuildingType.HOTEL) {
@@ -156,10 +157,10 @@ class Building {
                 //Frontwall
                 let rand = Math.random(); 
                 if (i == 0 || i == (this.sectionsW - 1)) { // the ends of a mansion can have extentions or towers
-                    if (rand < 0.1) {
+                    if (rand < 0.2) {
                         this.frontwall.push('T');
                     }
-                    else if (rand < 0.3) {
+                    else if (rand < 0.5) {
                         this.frontwall.push('B');
                     }
                     else {
@@ -485,27 +486,18 @@ class Building {
 
         let story = 0;
         let section = 0;
-        for (let i = 0; i < this.frontwall.length; i++) {
+        for (let i = 0; i < this.backwall.length; i++) {
             let pos: number[] = [];
             let nor: number[] = [];
             let idx: number[] = [];
             let scale: vec3 = vec3.fromValues(offsetW,offsetH, 1);
             let off: vec3 = vec3.fromValues(offsetW * section, offsetH * story, this.dimensions[2]);
-            let s = this.frontwall[i];
+            let s = this.backwall[i];
             if (s == ']') {
                 story++;
                 section = 0;
             }
             else if (s == '_') {
-                section++;
-            }
-            else if (s == 'D') {
-                pos = Structure.createSquarePos();
-                nor = Structure.createSquareNor();
-                idx = Structure.createSquareIdx(this.positions.length / 4);
-                this.pushColor(0.6, 0.18, 0.18, pos.length / 4);
-                vec3.multiply(scale, scale, vec3.fromValues(0.5, 0.8, 1));
-                vec3.add(off, off, vec3.fromValues(0.25, 0, 0.01));
                 section++;
             }
             else if (s == 'w') {
@@ -557,13 +549,13 @@ class Building {
 
         story = 0;
         section = 0;
-        for (let i = 0; i < this.backwall.length; i++) {
+        for (let i = 0; i < this.frontwall.length; i++) {
             let pos: number[] = [];
             let nor: number[] = [];
             let idx: number[] = [];
             let scale: vec3 = vec3.fromValues(offsetW, offsetH, -1);
             let off: vec3 = vec3.fromValues(offsetW * section, offsetH * story, 0);
-            let s = this.backwall[i];
+            let s = this.frontwall[i];
             if (s == ']') {
                 story++;
                 section = 0;
@@ -786,10 +778,700 @@ class Building {
     }
 
     generateBigHouseVbos() {
+        let temppos = Structure.createCubePos();
+        let tempnor = Structure.createCubeNor();
+        let tempidx = Structure.createCubeIdx(0);
+
+        for (let i = 0; i < temppos.length; i = i + 4) {
+            temppos[i] *= this.dimensions[0];
+            temppos[i + 1] *= this.dimensions[1];
+            temppos[i + 2] *= this.dimensions[2];
+        }
+
+        this.positions = temppos;
+        this.normals = tempnor;
+        this.indices = tempidx;
+        this.pushColor(0.96, 0.96, 0.89, temppos.length / 4);
+
+        let offsetW = this.dimensions[0] / this.sectionsW;
+        let offsetD = this.dimensions[2] / this.sectionsD;
+        let offsetH = this.dimensions[1] / this.stories;
+
+        let leftTower = false;
+        let rightTower = false;
+        let leftExt = false;
+        let rightExt = false;
+
+        let story = 0;
+        let section = 0;
+        for (let i = 0; i < this.backwall.length; i++) {
+            let pos: number[] = [];
+            let nor: number[] = [];
+            let idx: number[] = [];
+            let scale: vec3 = vec3.fromValues(offsetW,offsetH, 1);
+            let off: vec3 = vec3.fromValues(offsetW * section, offsetH * story, this.dimensions[2]);
+            let s = this.backwall[i];
+            if (s == ']') {
+                story++;
+                section = 0;
+            }
+            else if (s == '_') {
+                section++;
+            }
+            else if (s == 'W') {
+                pos = Structure.createBWindowPos();
+                nor = Structure.createBWindowNor();
+                idx = Structure.createBWindowIdx(this.positions.length / 4);
+                this.pushColor(0.6, 0.6, 0.8, 4);
+                this.pushColor(0.1, 0.1, 0.1, 4);
+                vec3.multiply(scale, scale, vec3.fromValues(0.8, 0.6, 1));
+                vec3.add(off, off, vec3.fromValues(0.1, 0.3, 0.01));
+                section++;
+            }
+            for(let n = 0; n < pos.length; n = n + 4) {
+                pos[n] *= scale[0];
+                pos[n] += off[0]
+                pos[n + 1] *= scale[1];
+                pos[n + 1] += off[1];
+                pos[n + 2] *= scale[2];
+                pos[n + 2] += off[2];
+
+                this.positions.push(pos[n]);
+                this.positions.push(pos[n + 1]);
+                this.positions.push(pos[n + 2]);
+                this.positions.push(pos[n + 3]);
+
+                nor[n] /= scale[0];
+                nor[n + 1] /= scale[1];
+                nor[n + 2] /= scale[2];
+                let nvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n], nor[n + 1], nor[n + 2]));
+
+                this.normals.push(nvec[0]);
+                this.normals.push(nvec[1]);
+                this.normals.push(nvec[2]);
+                this.normals.push(nor[n + 3]);
+            }
+            for(let n = 0; n < idx.length; n++) {
+                this.indices.push(idx[n]);
+            }
+        }
+
+        story = 0;
+        section = 0;
+        for (let i = 0; i < this.frontwall.length; i++) {
+            let pos: number[] = [];
+            let nor: number[] = [];
+            let idx: number[] = [];
+            let scale: vec3 = vec3.fromValues(offsetW, offsetH, -1);
+            let off: vec3 = vec3.fromValues(offsetW * section, offsetH * story, 0);
+            let s = this.frontwall[i];
+            if (s == ']') {
+                story++;
+                section = 0;
+            }
+            else if (s == 'B') {
+                if (story == 0) {
+                    if (section == 0) {
+                        leftExt = true;
+                    }
+                    else {
+                        rightExt = true;
+                    }
+                }
+                section++;
+            }
+            else if (s == 'T') {
+                if (story == 0) {
+                    if (section == 0) {
+                        leftTower = true;
+                    }
+                    else {
+                        rightTower = true;
+                    }
+                }
+                section++;
+            }
+            else if (s == '_') {
+                section++;
+            }
+            else if (s == 'D') {
+                pos = Structure.createSquarePos();
+                nor = Structure.createSquareNor();
+                idx = Structure.createSquareIdx(this.positions.length / 4);
+                this.pushColor(0.6, 0.18, 0.18, pos.length / 4);
+                vec3.multiply(scale, scale, vec3.fromValues(0.9, 0.8, 1));
+                vec3.add(off, off, vec3.fromValues(0.05, 0, -0.01));
+                section++;
+            }
+            else if (s == 'W') {
+                pos = Structure.createBWindowPos();
+                nor = Structure.createBWindowNor();
+                idx = Structure.createBWindowIdx(this.positions.length / 4);
+                this.pushColor(0.6, 0.6, 0.8, 4);
+                this.pushColor(0.1, 0.1, 0.1, 4);
+                vec3.multiply(scale, scale, vec3.fromValues(0.8, 0.6, 1));
+                vec3.add(off, off, vec3.fromValues(0.1, 0.3, -0.01));
+                section++;
+            }
+            for(let n = 0; n < pos.length; n = n + 4) {
+                pos[n] *= scale[0];
+                pos[n] += off[0]
+                pos[n + 1] *= scale[1];
+                pos[n + 1] += off[1];
+                pos[n + 2] *= scale[2];
+                pos[n + 2] += off[2];
+
+                this.positions.push(pos[n]);
+                this.positions.push(pos[n + 1]);
+                this.positions.push(pos[n + 2]);
+                this.positions.push(pos[n + 3]);
+
+                nor[n] /= scale[0];
+                nor[n + 1] /= scale[1];
+                nor[n + 2] /= scale[2];
+                let nvec = vec3.normalize(vec3.create(), vec3.fromValues(-nor[n], -nor[n + 1], -nor[n + 2]));
+
+                this.normals.push(nvec[0]);
+                this.normals.push(nvec[1]);
+                this.normals.push(nvec[2]);
+                this.normals.push(nor[n + 3]);
+            }
+            for(let n = 0; n < idx.length; n++) {
+                this.indices.push(idx[n]);
+            }
+        }
+
+        story = 0;
+        section = 0;
+        for (let i = 0; i < this.leftwall.length; i++) {
+            let pos: number[] = [];
+            let nor: number[] = [];
+            let idx: number[] = [];
+            let scale: vec3 = vec3.fromValues(offsetD, offsetH, 1);
+            let off: vec3 = vec3.fromValues(offsetD * section, offsetH * story, 0);
+            let s = this.leftwall[i];
+            if (s == ']') {
+                story++;
+                section = 0;
+            }
+            else if (s == '_') {
+                section++;
+            }
+
+            for(let n = 0; n < pos.length; n = n + 4) {
+                pos[n] *= scale[0];
+                pos[n] += off[0]
+                pos[n + 1] *= scale[1];
+                pos[n + 1] += off[1];
+                pos[n + 2] *= scale[2];
+                pos[n + 2] += off[2];
+
+                let vpos = vec3.rotateY(vec3.create(), vec3.fromValues(pos[n], pos[n + 1], pos[n + 2]), 
+                vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[2] / 2), PI / 2);
+
+                this.positions.push(vpos[0]);
+                this.positions.push(vpos[1]);
+                this.positions.push(vpos[2]);
+                this.positions.push(pos[n + 3]);
+
+                nor[n] /= scale[0];
+                nor[n + 1] /= scale[1];
+                nor[n + 2] /= scale[2];
+                let nvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n], nor[n + 1], nor[n + 2]));
+                vec3.rotateY(nvec, nvec, vec3.fromValues(0,0,0), PI / 2);
+
+                this.normals.push(nvec[0]);
+                this.normals.push(nvec[1]);
+                this.normals.push(nvec[2]);
+                this.normals.push(nor[n + 3]);
+            }
+            for(let n = 0; n < idx.length; n++) {
+                this.indices.push(idx[n]);
+            }
+        }
+
+        story = 0;
+        section = 0;
+        for (let i = 0; i < this.leftwall.length; i++) {
+            let pos: number[] = [];
+            let nor: number[] = [];
+            let idx: number[] = [];
+            let scale: vec3 = vec3.fromValues(offsetD, offsetH, 1);
+            let off: vec3 = vec3.fromValues(offsetD * section, offsetH * story, 0);
+            let s = this.leftwall[i];
+            if (s == ']') {
+                story++;
+                section = 0;
+            }
+            else if (s == '_') {
+                section++;
+            }
+            for(let n = 0; n < pos.length; n = n + 4) {
+                pos[n] *= scale[0];
+                pos[n] += off[0]
+                pos[n + 1] *= scale[1];
+                pos[n + 1] += off[1];
+                pos[n + 2] *= scale[2];
+                pos[n + 2] += off[2];
+
+                let vpos = vec3.rotateY(vec3.create(), vec3.fromValues(pos[n], pos[n + 1], pos[n + 2]), 
+                vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[2] / 2), -PI / 2);
+
+                this.positions.push(vpos[0]);
+                this.positions.push(vpos[1]);
+                this.positions.push(vpos[2]);
+                this.positions.push(pos[n + 3]);
+
+                nor[n] /= scale[0];
+                nor[n + 1] /= scale[1];
+                nor[n + 2] /= scale[2];
+                let nvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n], nor[n + 1], nor[n + 2]));
+                vec3.rotateY(nvec, nvec, vec3.fromValues(0,0,0), -PI / 2);
+
+                this.normals.push(nvec[0]);
+                this.normals.push(nvec[1]);
+                this.normals.push(nvec[2]);
+                this.normals.push(nor[n + 3]);
+            }
+            for(let n = 0; n < idx.length; n++) {
+                this.indices.push(idx[n]);
+            }
+        }
+
+        let pos: number[] = [];
+        let nor: number[] = [];
+        let idx: number[] = [];
+        let scale: vec3 = vec3.fromValues(this.dimensions[0] + offsetW / 2, offsetH / 2, this.dimensions[2] + offsetD / 2);
+        let off: vec3 = vec3.fromValues(-offsetW / 4, this.dimensions[1], -offsetD / 4);
+        if (this.roof[0] == 'F') {
+            pos = Structure.createCubePos();
+            nor = Structure.createCubeNor();
+            idx = Structure.createCubeIdx(this.positions.length / 4);
+        }
+        else {
+            pos = Structure.createPRoofPos();
+            nor = Structure.createPRoofNor();
+            idx = Structure.createPRoofIdx(this.positions.length / 4);
+            scale[1] = this.dimensions[1] / 2;
+        }
+        this.pushColor(0.1, 0.1, 0.1, pos.length / 4);
+        for(let n = 0; n < pos.length; n = n + 4) {
+                pos[n] *= scale[0];
+                pos[n] += off[0]
+                pos[n + 1] *= scale[1];
+                pos[n + 1] += off[1];
+                pos[n + 2] *= scale[2];
+                pos[n + 2] += off[2];
+
+                this.positions.push(pos[n]);
+                this.positions.push(pos[n + 1]);
+                this.positions.push(pos[n + 2]);
+                this.positions.push(pos[n + 3]);
+
+                nor[n] /= scale[0];
+                nor[n + 1] /= scale[1];
+                nor[n + 2] /= scale[2];
+
+                this.normals.push(nor[n]);
+                this.normals.push(nor[n + 1]);
+                this.normals.push(nor[n + 2]);
+                this.normals.push(nor[n + 3]);
+            }
+            for(let n = 0; n < idx.length; n++) {
+                this.indices.push(idx[n]);
+            }
+
+            let origLength = this.positions.length;
+            let extScale = vec3.fromValues((Math.random() * 0.4 - 0.2) + 1, 1, Math.random() * 0.2 + 0.6);
+            let newDim = vec3.multiply(vec3.create(), extScale, this.dimensions);
+            if (leftExt) { // Add an extention if left ext is true
+
+                for(let i = 0; i < origLength; i = i + 4) {
+                    let posvec = vec3.fromValues(this.positions[i] * extScale[0], this.positions[i + 1], this.positions[i + 2] * extScale[2]);
+                    vec3.rotateY(posvec, posvec, vec3.fromValues(0,0,0), PI / 4);
+                    vec3.add(posvec, posvec, vec3.fromValues(this.dimensions[0] + 1, 0, 0));
+    
+                    this.positions.push(posvec[0]);
+                    this.positions.push(posvec[1]);
+                    this.positions.push(posvec[2]);
+                    this.positions.push(this.positions[i + 3]);
+    
+                    let norvec = vec3.fromValues(tempnor[i], tempnor[i + 1], tempnor[i + 2]); // Dont need to scale because everything is a square
+                    vec3.rotateY(norvec, norvec, vec3.fromValues(0, 0, 0), PI / 4);
+    
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(this.normals[i + 3]);
+    
+                    this.colors.push(this.colors[i]);
+                    this.colors.push(this.colors[i + 1]);
+                    this.colors.push(this.colors[i + 2]);
+                    this.colors.push(this.colors[i + 3]);
+                }
+                let idxlength = this.indices.length;
+                for(let i = 0; i < idxlength; i++) {
+                    this.indices.push(this.indices[i] + (origLength / 4));
+                }
+    
+            }
+
+            if (rightExt) { // Add an extention if right ext is true
+
+                for(let i = 0; i < origLength; i = i + 4) {
+                    let posvec = vec3.fromValues(this.positions[i] * extScale[0], this.positions[i + 1], this.positions[i + 2] * extScale[2]);
+                    vec3.rotateY(posvec, posvec, vec3.fromValues(0,0,0), -PI / 4);
+                    vec3.add(posvec, posvec, vec3.fromValues(-newDim[0] * 0.71 - 1, 0, -newDim[0] * 0.71));
+    
+                    this.positions.push(posvec[0]);
+                    this.positions.push(posvec[1]);
+                    this.positions.push(posvec[2]);
+                    this.positions.push(this.positions[i + 3]);
+    
+                    let norvec = vec3.fromValues(tempnor[i], tempnor[i + 1], tempnor[i + 2]); // Dont need to scale because everything is a square
+                    vec3.rotateY(norvec, norvec, vec3.fromValues(0, 0, 0), -PI / 4);
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(this.normals[i + 3]);
+    
+                    this.colors.push(this.colors[i]);
+                    this.colors.push(this.colors[i + 1]);
+                    this.colors.push(this.colors[i + 2]);
+                    this.colors.push(this.colors[i + 3]);
+                }
+                let idxlength = this.indices.length;
+                for(let i = 0; i < idxlength; i++) {
+                    this.indices.push(this.indices[i] + (origLength / 4));
+                }
+    
+            }
 
     }
 
     generateHotelVbos() {
+        let pos = Structure.createCubePos();
+        let nor = Structure.createCubeNor();
+        let idx = Structure.createCubeIdx(0);
+
+        for (let i = 0; i < pos.length; i = i + 4) {
+            this.positions.push(pos[i] * this.dimensions[0]);
+            this.positions.push(pos[i + 1] * this.dimensions[1]);
+            this.positions.push(pos[i + 2] * this.dimensions[2]);
+            this.positions.push(pos[i + 3]);
+
+            // This will properly transform the normal based on the scaling of the building
+            let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / this.dimensions[1], nor[i + 2] / this.dimensions[2]));
+
+            this.normals.push(norvec[0]);
+            this.normals.push(norvec[1]);
+            this.normals.push(norvec[2]);
+            this.normals.push(nor[i + 3]);                    
+        }
+
+
+        for(let i = 0; i < idx.length; i++) {
+            this.indices.push(idx[i]);
+        }
+        this.pushColor(0.8, 0.65, 0.6, pos.length / 4);
+
+        let section = 0;
+        let story = 0;
+        let offsetW = this.dimensions[0] / this.sectionsW;
+        let offsetH = this.dimensions[1] / this.stories;
+        let leftExt = false; // these are used to know if we have building extentions
+        let rightExt = false;
+        for (let i = 0; i < this.frontwall.length; i++) {
+            let s = this.frontwall[i];
+            if (s == '[') {
+                section = 0;
+            }
+            else if (s == ']') {
+                story++;
+            }
+            else if (s == 'W') {
+                pos = Structure.createBWindowPos(); // At the end of a story push any extended parts to the vbos
+                nor = Structure.createBWindowNor();
+                idx = Structure.createBWindowIdx(this.positions.length / 4);
+
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    this.positions.push(pos[n] * offsetW * 0.8 + offsetW * section + 0.1);
+                    this.positions.push(pos[n + 1] * offsetH * 0.6 + offsetH * story + 0.2);
+                    this.positions.push(-pos[n + 2] - 0.01);
+                    this.positions.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2] / 0.5));
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(nor[n + 3]);  
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    this.indices.push(idx[n]);
+                }
+                this.pushColor(0.6, 0.6, 0.8, 4);
+                this.pushColor(0,0,0, 4);
+
+                section++;
+            }
+            else if (s == 'D') {
+                pos = Structure.createSquarePos(); // At the end of a story push any extended parts to the vbos
+                nor = Structure.createSquareNor();
+                idx = Structure.createSquareIdx(this.positions.length / 4);
+
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    this.positions.push(pos[n] * offsetW * 0.5 + offsetW * section + 0.25);
+                    this.positions.push(pos[n + 1] * offsetH * 0.8 + offsetH * story);
+                    this.positions.push(pos[n + 2] - 0.01);
+                    this.positions.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / offsetW, nor[n + 1] / offsetH, nor[n + 2] / 0.5));
+
+                    this.normals.push(norvec[0]);
+                    this.normals.push(norvec[1]);
+                    this.normals.push(norvec[2]);
+                    this.normals.push(nor[n + 3]);  
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    this.indices.push(idx[n]);
+                }
+                this.pushColor(0.6, 0.18, 0.18, pos.length / 4);
+
+                section++;
+            }
+            else if (s == '_') {
+                section++;
+            }
+            else if (s == 'B'){
+                if (story == 0) {
+                    if (section == 0) {
+                        leftExt = true;
+                    }
+                    else {
+                        rightExt = true;
+                    }
+                }
+                section++;
+            }
+        }
+
+        section = 0;
+        story = 0;
+
+        let temppos: number[] = [];
+        let tempnor: number[] = [];
+        let tempidx: number[] = [];
+        for (let i = 0; i < this.backwall.length; i++) {
+            let s = this.backwall[i];
+            if (s == '[') {
+                section = 0;
+            }
+            else if (s == ']') {
+                story++;
+            }
+            else if (s == 'W') {
+                pos = Structure.createBWindowPos(); // At the end of a story push any extended parts to the vbos
+                nor = Structure.createBWindowNor();
+                idx = Structure.createBWindowIdx(temppos.length / 4);
+
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    temppos.push(pos[n] * offsetW * 0.8 + offsetW * section + 0.1);
+                    temppos.push(pos[n + 1] * offsetH * 0.6 + offsetH * story + 0.2);
+                    temppos.push(-pos[n + 2] - 0.01);
+                    temppos.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / (offsetW * 0.8), nor[n + 1] / (offsetH * 0.6), nor[n + 2]));
+
+                    tempnor.push(norvec[0]);
+                    tempnor.push(norvec[1]);
+                    tempnor.push(norvec[2]);
+                    tempnor.push(nor[n + 3]);  
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    tempidx.push(idx[n]);
+                }
+                this.pushColor(0.6, 0.6, 0.8, 4);
+                this.pushColor(0,0,0, 4);
+
+                section++;
+            }
+            else if (s == 'D') {
+                pos = Structure.createSquarePos(); // At the end of a story push any extended parts to the vbos
+                nor = Structure.createSquareNor();
+                idx = Structure.createSquareIdx(temppos.length / 4);
+
+                for (let n = 0; n < pos.length; n = n + 4) {
+                    temppos.push(pos[n] * offsetW * 0.5 + offsetW * section + 0.25);
+                    temppos.push(pos[n + 1] * offsetH * 0.8 + offsetH * story);
+                    temppos.push(pos[n + 2] - 0.01);
+                    temppos.push(pos[n + 3]);
+
+                    // This will properly transform the normal based on the scaling of the building
+                    let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[n] / (offsetW * 0.5), nor[n + 1] / (offsetH * 0.8), nor[n + 2]));
+
+                    tempnor.push(norvec[0]);
+                    tempnor.push(norvec[1]);
+                    tempnor.push(norvec[2]);
+                    tempnor.push(nor[n + 3]); 
+                }
+
+                for(let n = 0; n < idx.length; n++) {
+                    tempidx.push(idx[n]);
+                }
+                this.pushColor(0.6, 0.18, 0.18, pos.length / 4);
+
+                section++;
+            }
+            else if (s == '_') {
+                section++;
+            }
+        }
+
+        for(let i = 0; i < tempidx.length; i++) {
+            this.indices.push(tempidx[i] + (this.positions.length / 4));
+        }
+
+        for(let i = 0; i < temppos.length; i = i + 4) {
+            let posvec = vec3.fromValues(temppos[i], temppos[i + 1], temppos[i + 2]);
+            vec3.rotateY(posvec, posvec, vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[2] / 2), PI);
+
+            this.positions.push(posvec[0]);
+            this.positions.push(posvec[1]);
+            this.positions.push(posvec[2]);
+            this.positions.push(temppos[i + 3]);
+
+            let norvec = vec3.fromValues(tempnor[i], tempnor[i + 1], tempnor[i + 2]);
+            vec3.rotateY(norvec, norvec, vec3.fromValues(0, 0, 0), PI);
+
+            this.normals.push(norvec[0]);
+            this.normals.push(norvec[1]);
+            this.normals.push(norvec[2]);
+            this.normals.push(tempnor[i + 3]);
+        }
+
+        let origLength = this.positions.length;
+        let extScale = vec3.fromValues((Math.random() * 0.4 - 0.2) + 1, 1, Math.random() * 0.2 + 0.6);
+        let newDim = vec3.multiply(vec3.create(), extScale, this.dimensions);
+        if (leftExt) { // Add an extention if left ext is true
+
+            for(let i = 0; i < origLength; i = i + 4) {
+                let posvec = vec3.fromValues(this.positions[i] * extScale[0], this.positions[i + 1], this.positions[i + 2] * extScale[2]);
+                vec3.rotateY(posvec, posvec, vec3.fromValues(0,0,0), PI / 2);
+                vec3.add(posvec, posvec, vec3.fromValues(this.dimensions[0], 0, 0));
+
+                this.positions.push(posvec[0]);
+                this.positions.push(posvec[1]);
+                this.positions.push(posvec[2]);
+                this.positions.push(this.positions[i + 3]);
+
+                let norvec = vec3.fromValues(tempnor[i], tempnor[i + 1], tempnor[i + 2]); // Dont need to scale because everything is a square
+                vec3.rotateY(norvec, norvec, vec3.fromValues(0, 0, 0), PI / 2);
+
+                this.normals.push(norvec[0]);
+                this.normals.push(norvec[1]);
+                this.normals.push(norvec[2]);
+                this.normals.push(this.normals[i + 3]);
+
+                this.colors.push(this.colors[i]);
+                this.colors.push(this.colors[i + 1]);
+                this.colors.push(this.colors[i + 2]);
+                this.colors.push(this.colors[i + 3]);
+            }
+            let idxlength = this.indices.length;
+            for(let i = 0; i < idxlength; i++) {
+                this.indices.push(this.indices[i] + (origLength / 4));
+            }
+
+            pos = Structure.createCubePos();
+            nor = Structure.createCubeNor();
+            idx = Structure.createCubeIdx(this.positions.length / 4);
+            for (let i = 0; i < pos.length; i = i + 4) {
+                this.positions.push(pos[i] * newDim[2] + this.dimensions[0]);
+                this.positions.push(pos[i + 1] * this.dimensions[1]);
+                this.positions.push(pos[i + 2] * this.dimensions[2]);
+                this.positions.push(pos[i + 3]);
+    
+                // This will properly transform the normal based on the scaling of the building
+                let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / this.dimensions[1], nor[i + 2] / this.dimensions[2]));
+    
+                this.normals.push(norvec[0]);
+                this.normals.push(norvec[1]);
+                this.normals.push(norvec[2]);
+                this.normals.push(nor[i + 3]);                    
+            }
+    
+    
+            for(let i = 0; i < idx.length; i++) {
+                this.indices.push(idx[i]);
+            }
+            this.pushColor(0.8, 0.65, 0.6, pos.length / 4);
+
+        }
+
+        if (rightExt) { // Add an extention if right ext is true
+
+            for(let i = 0; i < origLength; i = i + 4) {
+                let posvec = vec3.fromValues(this.positions[i] * extScale[0], this.positions[i + 1], this.positions[i + 2] * extScale[2]);
+                vec3.rotateY(posvec, posvec, vec3.fromValues(0,0,0), -PI / 2);
+                vec3.add(posvec, posvec, vec3.fromValues(0, 0, -newDim[0]));
+
+                this.positions.push(posvec[0]);
+                this.positions.push(posvec[1]);
+                this.positions.push(posvec[2]);
+                this.positions.push(this.positions[i + 3]);
+
+                let norvec = vec3.fromValues(tempnor[i], tempnor[i + 1], tempnor[i + 2]); // Dont need to scale because everything is a square
+                vec3.rotateY(norvec, norvec, vec3.fromValues(0, 0, 0), -PI / 2);
+
+                this.normals.push(norvec[0]);
+                this.normals.push(norvec[1]);
+                this.normals.push(norvec[2]);
+                this.normals.push(this.normals[i + 3]);
+
+                this.colors.push(this.colors[i]);
+                this.colors.push(this.colors[i + 1]);
+                this.colors.push(this.colors[i + 2]);
+                this.colors.push(this.colors[i + 3]);
+            }
+            let idxlength = this.indices.length;
+            for(let i = 0; i < idxlength; i++) {
+                this.indices.push(this.indices[i] + (origLength / 4));
+            }
+
+            pos = Structure.createCubePos();
+            nor = Structure.createCubeNor();
+            idx = Structure.createCubeIdx(this.positions.length / 4);
+            for (let i = 0; i < pos.length; i = i + 4) {
+                this.positions.push(pos[i] * newDim[2] - newDim[2]);
+                this.positions.push(pos[i + 1] * this.dimensions[1]);
+                this.positions.push(pos[i + 2] * this.dimensions[2]);
+                this.positions.push(pos[i + 3]);
+    
+                // This will properly transform the normal based on the scaling of the building
+                let norvec = vec3.normalize(vec3.create(), vec3.fromValues(nor[i] / this.dimensions[0], nor[i + 1] / this.dimensions[1], nor[i + 2] / this.dimensions[2]));
+    
+                this.normals.push(norvec[0]);
+                this.normals.push(norvec[1]);
+                this.normals.push(norvec[2]);
+                this.normals.push(nor[i + 3]);                    
+            }
+    
+    
+            for(let i = 0; i < idx.length; i++) {
+                this.indices.push(idx[i]);
+            }
+            this.pushColor(0.8, 0.65, 0.6, pos.length / 4);
+
+        }
+
 
     }
 
@@ -1160,7 +1842,8 @@ class Building {
 
         for(let i = 0; i < temppos.length; i = i + 4) {
             let posvec = vec3.fromValues(temppos[i], temppos[i + 1], temppos[i + 2]);
-            vec3.rotateY(posvec, posvec, vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[2] / 2), PI / 2);
+            vec3.rotateY(posvec, posvec, vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[0] / 2), PI / 2);
+            vec3.add(posvec, posvec, vec3.fromValues(0, 0, this.dimensions[2] - this.dimensions[0]));
 
             this.positions.push(posvec[0]);
             this.positions.push(posvec[1]);
@@ -1277,7 +1960,7 @@ class Building {
 
         for(let i = 0; i < temppos.length; i = i + 4) {
             let posvec = vec3.fromValues(temppos[i], temppos[i + 1], temppos[i + 2]);
-            vec3.rotateY(posvec, posvec, vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[2] / 2), -PI / 2);
+            vec3.rotateY(posvec, posvec, vec3.fromValues(this.dimensions[0] / 2, 0, this.dimensions[0] / 2), -PI / 2);
 
             this.positions.push(posvec[0]);
             this.positions.push(posvec[1]);
