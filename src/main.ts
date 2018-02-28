@@ -14,18 +14,19 @@ import Tree from './geometry/Tree';
 import OBJFile from './geometry/OBJFile';
 import Structure from './geometry/Structure';
 import Building, {BuildingType} from './Building';
+import City from './City';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   tesselations: 6,
-  'Add Tree': loadScene, // A function pointer, essentially
+  'Grow City': growCity, // A function pointer, essentially
   'Reset Scene': resetScene,
   iterations: 15,
   'Weeping Willow Mode': false,
   OBJName: '',
   'Load OBJ': loadObj,
-  SingleBuilding: true,
+  SingleBuilding: false,
   width: 8,
   depth: 5,
   height: 3,
@@ -45,6 +46,7 @@ let OBJCreated = false;
 
 let buil: Building;
 let str: Structure;
+let city: City;
 
 function loadScene() {
   // icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
@@ -88,7 +90,21 @@ function loadScene() {
     str = new Structure();
     str.createCity(buil.positions, buil.normals, buil.colors, buil.indices);
   }
+  else {
+    city = new City(1000);
+    city.generateVbos();
 
+    str = new Structure();
+    str.createCity(city.positions, city.normals, city.colors, city.indices);
+  }
+
+}
+
+function growCity() {
+  city.growCity();
+  city.generateVbos();
+  str.destory()
+  str.createCity(city.positions, city.normals, city.colors, city.indices);
 }
 
 function loadObj() { // Note This only works if an obj file is available
@@ -99,7 +115,6 @@ function loadObj() { // Note This only works if an obj file is available
 }
 
 function resetScene() {
-  parser = new Parser();
   loadScene();
 }
 
@@ -116,7 +131,7 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
   
-  gui.add(controls, 'Add Tree');
+  gui.add(controls, 'Grow City');
   gui.add(controls, 'Reset Scene');
   gui.add(controls, 'iterations', 1, 30).step(1);
   gui.add(controls, 'OBJName');
@@ -141,7 +156,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 10, -20), vec3.fromValues(0, 5, 0));
+  const camera = new Camera(vec3.fromValues(0, 100, -20), vec3.fromValues(500, 5, 500));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);

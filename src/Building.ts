@@ -45,7 +45,6 @@ class Building {
         }
         else if (this.type == BuildingType.BIGHOUSE) {
             this.generateBigHouse();
-            console.log(this.frontwall);
             this.generateBigHouseVbos();
         }
         else if (this.type == BuildingType.HOTEL) {
