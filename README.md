@@ -1,5 +1,42 @@
-
+﻿
 # Project 5: Shape Grammar
+
+Gabriel Robinson-Barr
+## Things to know about my city grammars.
+Each building is created in Building.ts and the design is determined by the type of building. The actual building grammar is near impossible to read, and I'm sorry for that, but by the time I realized how unreadable and messy it was I was way too far in to go back and fix it. Ill list an abbreviated version of the rules here.
+
+Houses -
+Must have one door in the front on the ground floor.
+Can have single or double windows in any of the other slots.
+Can have flat or pointed roofs.
+
+Big Houses (mansions) -
+Can have 2-3 doors in the front.
+Only have double windows.
+Can have auxillary buildings to their left, right, or both.
+Have pointed roofs.
+
+Hotels -
+Can be one rectangle building or have one to two building extentions.
+Alternate doors and windows on the front, and possibly the back.
+Have flat roofs.
+
+Offices -
+Have windows on every section above ground floor.
+Can have parts that stick out one section further than the rest of the building on any wall.
+Have flat roofs.
+
+Skyscrapers -
+3 types of sky scrapers, Flat roof, slanted roof, and round roof buildings.
+Each of these has the same body of the building, except round roof buildings are round instead of square.
+Have rows of windows separated by small floor dividers.
+Flat and slanted roofs can stack roofs on top of each other to look cooler.
+
+
+That is the basic layout for every unreadable rule in the building class. If you want to look at individual buildings and only generate random buildings, go into main.ts, set controls.SingleBuilding to true as the default value, and set the camera's initialized value to something like location - (0, 10, -20), and look - (0, 5, 0). As its set now it is super zoomed out to be able to see the entire city. Once you are in single building mode you can change the width/depth/height of buildings and hit reset scene to get a random building. Some of the buildings don't look good if they aren't square since I always make them roughly square in my city.
+
+
+For the gui, hitting the 'Grow City' button will grow the city by one iteration. This is the only implemented way to get a city at higher iterations. The rules in City.ts are fairly easy to understand, and mostly consist of rules about what kind of building to create at certain distances from other buildings. All citys start with nothing but mansions, since only rich people can afford to settle land. Sometimes when iterating the growth it can take a few iterations to really get going, but once there are buildings other than just mansions the citys tend to grow quickly. Buildings can also get bigger as the city grows, but this is not particularly noticable. There is some collision and the building grammar isn't perfect.
 
 For this assignment you'll be building directly off of the L-system code you
 wrote last week.

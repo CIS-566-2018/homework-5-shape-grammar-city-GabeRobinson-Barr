@@ -49,22 +49,6 @@ let str: Structure;
 let city: City;
 
 function loadScene() {
-  // icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
-  // icosphere.create();
-  // square = new Square(vec3.fromValues(0, 0, 0));
-  // square.create();
-  // cube = new Cube(vec3.fromValues(2, 0, 0));
-  // cube.create();
-
-  // let willowmode = 0;
-  // if (controls['Weeping Willow Mode']) {
-  //   willowmode = 20;
-  // }
-  // expander.expandSeed(controls.iterations + willowmode);
-  // parser.parse(expander.tree);
-
-  // tree = new Tree();
-  // tree.createTree(parser.positions, parser.normals, parser.colors);
 
   if (controls.SingleBuilding) {
     let t: BuildingType;
@@ -89,6 +73,7 @@ function loadScene() {
 
     str = new Structure();
     str.createCity(buil.positions, buil.normals, buil.colors, buil.indices);
+    
   }
   else {
     city = new City(1000);
